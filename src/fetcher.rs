@@ -1,7 +1,7 @@
 use std::error::Error;
 use html_escape::decode_html_entities;
 use teloxide::prelude2::*;
-use teloxide::types::{MessageKind, ParseMode, User};
+use teloxide::types::{InputFile, MessageKind, ParseMode, User};
 use url::Url;
 
 pub async fn fetch_info(
@@ -63,7 +63,7 @@ pub async fn fetch_info(
 
             reddit_video.get("fallback_url").unwrap().as_str().unwrap()
         },
-        _ => post.get("url").unwrap().as_str().unwrap(),
+        _ => post.get("url_overridden_by_dest").unwrap().as_str().unwrap(),
     };
     let subreddit = post.get("subreddit").unwrap().as_str().unwrap();
     let author = post.get("author").unwrap().as_str().unwrap();
@@ -85,13 +85,18 @@ pub async fn fetch_info(
     };
 
     bot.send_message(msg.chat.id, format!("\
-    *{title}*[ ]({preview_url})\n\
+    *{title}*\n\
     By [u/{author}](https://reddit.com/u/{author}) in [r/{subreddit}](subreddit)\n\
     Sent by: @{sender}\n\
     Votes: {votes}\n\
     [Post Link]({url})\
     "))
         .parse_mode(ParseMode::Markdown)
+        .disable_web_page_preview(true)
+        .send()
+        .await?;
+
+    bot.send_photo(msg.chat.id, InputFile::url(Url::parse(preview_url).unwrap()))
         .send()
         .await?;
 
