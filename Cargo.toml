@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.11.10", features = ["json", "blocking"] }
-telegram-bot = "0.8.0"
-tokio = { version = "0.2", features = ["macros", "time", "fs"] }
+reqwest = { version = "0.11.10", features = ["json"] }
+teloxide = { version = "0.7.1", features = ["macros"] }
+pretty_env_logger = "0.4.0"
+tokio = { version = "1.8", features = ["fs", "rt-multi-thread", "macros"] }
 futures-util = "0.3.21"
 url = "2.2.2"
 serde_json = "1.0.79"
 html-escape = "0.2.11"
-tracing = "0.1.32"
-tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }
+log = "0.4.14"
