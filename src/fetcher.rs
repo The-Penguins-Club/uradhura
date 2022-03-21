@@ -1,5 +1,6 @@
 use std::error::Error;
 use html_escape::decode_html_entities;
+use image::{ImageFormat, ImageResult};
 use teloxide::prelude2::*;
 use teloxide::types::{InputFile, MessageKind, ParseMode};
 use url::Url;
@@ -14,7 +15,14 @@ pub async fn fetch_info(
         MessageKind::Common(message) => {
             match message.from {
                 None => "deleted_user".to_string(),
-                Some(u) => u.username.unwrap(),
+                Some(u) => {
+                    match u.username {
+                        Some(username) => username,
+                        None => u.first_name + &if let Some(last_name) = &u.last_name {
+                           " ".to_string() + last_name
+                        } else { "".to_string() },
+                    }
+                },
             }
         }
         _ => {
@@ -80,9 +88,13 @@ pub async fn fetch_info(
         Some(media) if !media.is_null() => {
             let reddit_video = media.get("reddit_video").unwrap();
 
-            reddit_video.get("fallback_url").unwrap().as_str().unwrap()
+            reddit_video.get("fallback_url").unwrap().as_str()
         },
-        _ => post.get("url_overridden_by_dest").unwrap().as_str().unwrap(),
+        _ => if let Some(u) = post.get("url_overridden_by_dest") {
+            u.as_str()
+        } else {
+            None
+        },
     };
     let subreddit = post.get("subreddit").unwrap().as_str().unwrap();
     let author = post.get("author").unwrap().as_str().unwrap();
@@ -104,7 +116,19 @@ pub async fn fetch_info(
         .send()
         .await?;
 
-    let req = match reqwest::get(preview_url)
+    if let None = preview_url {
+        bot.send_message(msg.chat.id, "Could not get preview :(")
+            .send()
+            .await?;
+
+        bot.delete_message(sending_message.chat.id, sending_message.id)
+            .send()
+            .await?;
+
+        return Ok(());
+    }
+
+    let req = match reqwest::get(preview_url.unwrap())
         .await {
         Ok(resp) => resp,
         Err(e) => {
@@ -137,9 +161,43 @@ pub async fn fetch_info(
             .send()
             .await?;
     } else {
-        bot.send_message(msg.chat.id, "Could not get preview :(")
-            .send()
-            .await?;
+        // last effort to see if it's an image
+        let img = match image::guess_format(&bytes.to_vec()) {
+            Ok(img) => img,
+            Err(_) => {
+                bot.send_message(msg.chat.id, "Could not get preview :(")
+                    .send()
+                    .await?;
+
+                return Ok(());
+            }
+        };
+
+        match img {
+            ImageFormat::Png => {
+                bot.send_photo(msg.chat.id, InputFile::memory(bytes)
+                    .file_name("preview.png"))
+                    .send()
+                    .await?;
+            }
+            ImageFormat::Jpeg => {
+                bot.send_photo(msg.chat.id, InputFile::memory(bytes)
+                    .file_name("preview.jpg"))
+                    .send()
+                    .await?;
+            }
+            ImageFormat::Gif => {
+                bot.send_photo(msg.chat.id, InputFile::memory(bytes)
+                    .file_name("preview.gif"))
+                    .send()
+                    .await?;
+            }
+            _ => {
+                bot.send_message(msg.chat.id, "Could not get preview :(")
+                    .send()
+                    .await?;
+            }
+        }
     }
 
     bot.delete_message(sending_message.chat.id, sending_message.id)
