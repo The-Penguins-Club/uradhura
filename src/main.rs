@@ -15,7 +15,7 @@ type Bot = AutoSend<teloxide::Bot>;
 )]
 enum Command {
     #[command(description = "Fetch information from Reddit post and embed it into a message")]
-    EmbedReddit {
+    Rdl {
         url: String,
     }
 }
@@ -26,7 +26,7 @@ async fn action(
     command: Command,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     match command {
-        Command::EmbedReddit { url } => fetch_info(bot, message, url).await?,
+        Command::Rdl { url } => fetch_info(bot, message, url).await?,
     }
 
     Ok(())

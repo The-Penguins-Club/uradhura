@@ -1,7 +1,7 @@
 use std::error::Error;
 use html_escape::decode_html_entities;
 use teloxide::prelude2::*;
-use teloxide::types::{InputFile, MessageKind, ParseMode, User};
+use teloxide::types::{InputFile, MessageKind, ParseMode};
 use url::Url;
 
 pub async fn fetch_info(
@@ -10,10 +10,26 @@ pub async fn fetch_info(
     url: String
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     bot.delete_message(msg.chat.id, msg.id).send().await?;
+    let sender = match msg.kind {
+        MessageKind::Common(message) => {
+            match message.from {
+                None => "deleted_user".to_string(),
+                Some(u) => u.username.unwrap(),
+            }
+        }
+        _ => {
+            bot.send_message(msg.chat.id, "Unexpected kind of message received")
+                .send()
+                .await?;
+
+            return Ok(());
+        }
+    };
     let parsed_url = match Url::parse(&url) {
         Ok(u) => u,
         Err(e) => {
-            bot.send_message(msg.chat.id, format!("Invalid url: {}", e.to_string()))
+            bot.send_message(msg.chat.id, format!("Invalid url: `{url}`. Sent by: @{sender}\nError message: {}", e.to_string()))
+                .parse_mode(ParseMode::Markdown)
                 .send()
                 .await?;
             return Ok(());
@@ -22,7 +38,8 @@ pub async fn fetch_info(
 
     if let Some(host) = parsed_url.host() {
         if !host.to_string().contains("reddit.com") {
-            bot.send_message(msg.chat.id, format!("Idk about anything other than Reddit"))
+            bot.send_message(msg.chat.id, format!("Invalid url: `{url}`. Sent by: @{sender}"))
+                .parse_mode(ParseMode::Markdown)
                 .send()
                 .await?;
             return Ok(());
@@ -34,7 +51,8 @@ pub async fn fetch_info(
         .await {
         Ok(resp) => resp,
         Err(e) => {
-            bot.send_message(msg.chat.id, format!("Couldn't talk to reddit: {}", e.to_string()))
+            bot.send_message(msg.chat.id, format!("Couldn't talk to reddit: {}.\nUrl: `{url}`.\nSent by: @{sender}", e.to_string()))
+                .parse_mode(ParseMode::Markdown)
                 .send()
                 .await?;
             return Ok(());
@@ -44,7 +62,8 @@ pub async fn fetch_info(
     let json: serde_json::Value = match resp.json().await {
         Ok(val) => val,
         Err(e) => {
-            bot.send_message(msg.chat.id, format!("Failed to understand what reddit said: {}", e.to_string()))
+            bot.send_message(msg.chat.id, format!("Failed to understand what reddit said: {}.\nUrl: `{url}`.\nSent by: @{sender}", e.to_string()))
+                .parse_mode(ParseMode::Markdown)
                 .send()
                 .await?;
             return Ok(());
@@ -68,21 +87,6 @@ pub async fn fetch_info(
     let subreddit = post.get("subreddit").unwrap().as_str().unwrap();
     let author = post.get("author").unwrap().as_str().unwrap();
     let votes = post.get("score").unwrap().as_i64().unwrap();
-    let sender = match msg.kind {
-        MessageKind::Common(message) => {
-            match message.from {
-                None => "deleted_user".to_string(),
-                Some(u) => u.username.unwrap(),
-            }
-        }
-        _ => {
-            bot.send_message(msg.chat.id, "Unexpected kind of message received")
-                .send()
-                .await?;
-
-            return Ok(());
-        }
-    };
 
     bot.send_message(msg.chat.id, format!("\
     *{title}*\n\
@@ -96,7 +100,49 @@ pub async fn fetch_info(
         .send()
         .await?;
 
-    bot.send_photo(msg.chat.id, InputFile::url(Url::parse(preview_url).unwrap()))
+    let sending_message = bot.send_message(msg.chat.id, "Getting preview...")
+        .send()
+        .await?;
+
+    let req = match reqwest::get(preview_url)
+        .await {
+        Ok(resp) => resp,
+        Err(e) => {
+            bot.send_message(msg.chat.id, format!("Couldn't get preview from reddit: {}", e.to_string()))
+                .send()
+                .await?;
+            return Ok(());
+        }
+    };
+
+    let content_type = req.headers().get("Content-Type").unwrap()
+        .to_str()?
+        .to_string();
+
+    let bytes = req.bytes().await.unwrap();
+
+    if content_type == "image/gif" {
+        bot.send_animation(msg.chat.id, InputFile::memory(bytes)
+            .file_name("preview.gif"))
+            .send()
+            .await?;
+    } else if content_type == "image/jpeg" {
+        bot.send_photo(msg.chat.id, InputFile::memory(bytes)
+            .file_name("preview.jpg"))
+            .send()
+            .await?;
+    } else if content_type == "video/mpeg" || content_type == "video/mp4" {
+        bot.send_video(msg.chat.id, InputFile::memory(bytes)
+            .file_name(if content_type == "video/mpeg" { "preview.mpeg" } else { "preview.mp4"  }))
+            .send()
+            .await?;
+    } else {
+        bot.send_message(msg.chat.id, "Could not get preview :(")
+            .send()
+            .await?;
+    }
+
+    bot.delete_message(sending_message.chat.id, sending_message.id)
         .send()
         .await?;
 
