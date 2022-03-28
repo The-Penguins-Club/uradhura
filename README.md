@@ -7,7 +7,7 @@ Telegram bot that fetches information from Reddit posts(with gif, image and vide
 
 ## Using Uradhura in Telegram
 
-Add [bot](https://t.me/uradhura_bot) to your group, or start a private chat. Use /rdl <reddit link> or send a link in the chat and reply with /rdl to fetch media. 
+Add [bot](https://t.me/uradhura_bot) to your group, or start a private chat. Use /rdl \<reddit link\> or send a link in the chat and reply with /rdl to fetch media. 
 
 ## Build instruction
 
