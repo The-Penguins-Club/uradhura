@@ -1,9 +1,9 @@
 mod fetcher;
 
+use crate::fetcher::fetch_info;
 use std::error::Error;
 use teloxide::prelude2::*;
 use teloxide::utils::command::BotCommand;
-use crate::fetcher::fetch_info;
 
 type Bot = AutoSend<teloxide::Bot>;
 
@@ -15,9 +15,7 @@ type Bot = AutoSend<teloxide::Bot>;
 )]
 enum Command {
     #[command(description = "Fetch information from Reddit post and embed it into a message")]
-    Rdl {
-        url: String,
-    }
+    Rdl { url: String },
 }
 
 async fn action(
