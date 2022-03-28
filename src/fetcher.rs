@@ -4,9 +4,26 @@ use std::env::temp_dir;
 use std::error::Error;
 use std::process::Command;
 use teloxide::prelude2::*;
-use teloxide::types::{InputFile, MessageKind, ParseMode};
+use teloxide::types::{InputFile, MessageCommon, MessageKind, ParseMode};
 use url::Url;
 use crate::validate_url;
+
+fn get_sender(message: &MessageCommon) -> String {
+    match &message.from {
+        None => "deleted_user".to_string(),
+        Some(u) => match &u.username {
+            Some(username) => username.to_string(),
+            None => {
+                u.first_name.clone()
+                    + &if let Some(last_name) = &u.last_name {
+                    " ".to_string() + last_name
+                } else {
+                    "".to_string()
+                }
+            }
+        },
+    }
+}
 
 pub async fn fetch_info(
     bot: crate::Bot,
@@ -15,19 +32,16 @@ pub async fn fetch_info(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     bot.delete_message(msg.chat.id, msg.id).send().await?;
     let sender = match msg.kind {
-        MessageKind::Common(message) => match message.from {
-            None => "deleted_user".to_string(),
-            Some(u) => match u.username {
-                Some(username) => username,
-                None => {
-                    u.first_name
-                        + &if let Some(last_name) = &u.last_name {
-                            " ".to_string() + last_name
-                        } else {
-                            "".to_string()
-                        }
+        MessageKind::Common(message) => {
+            if let Some(msg) = &message.reply_to_message {
+                if let MessageKind::Common(ref msg) = (&*msg).kind {
+                    get_sender(&msg)
+                } else {
+                    get_sender(&message)
                 }
-            },
+            } else {
+                get_sender(&message)
+            }
         },
         _ => {
             bot.send_message(msg.chat.id, "Unexpected kind of message received")
@@ -37,7 +51,7 @@ pub async fn fetch_info(
             return Ok(());
         }
     };
-    let mut parsed_url = match validate_url(&url) {
+    let parsed_url = match validate_url(&url) {
         Ok(u) => u,
         Err(_) => {
             bot.send_message(
@@ -118,13 +132,13 @@ pub async fn fetch_info(
                     let hls_url = match v.get("hls_url") {
                         Some(url) => url.as_str().unwrap(),
                         None => {
-                            bot.delete_message(sending_message.chat.id, sending_message.id)
+                            bot.edit_message_text(
+                                sending_message.chat.id,
+                                sending_message.id,
+                                format!("Couldn't get preview from reddit :("),
+                            )
                                 .send()
                                 .await?;
-                            bot.send_message(msg.chat.id, "Could not get preview :(")
-                                .send()
-                                .await?;
-
                             return Ok(());
                         }
                     };
@@ -149,25 +163,24 @@ pub async fn fetch_info(
                     match cmd {
                         Ok(o) => {
                             if !o.status.success() {
-                                println!("{}", String::from_utf8(o.stderr).unwrap());
-                                bot.delete_message(sending_message.chat.id, sending_message.id)
+                                bot.edit_message_text(
+                                    sending_message.chat.id,
+                                    sending_message.id,
+                                    format!("Couldn't get preview from reddit :("),
+                                )
                                     .send()
                                     .await?;
-                                bot.send_message(msg.chat.id, "Could not get preview :(")
-                                    .send()
-                                    .await?;
-
                                 return Ok(());
                             }
                         }
                         Err(_) => {
-                            bot.delete_message(sending_message.chat.id, sending_message.id)
+                            bot.edit_message_text(
+                                sending_message.chat.id,
+                                sending_message.id,
+                                format!("Couldn't get preview from reddit :("),
+                            )
                                 .send()
                                 .await?;
-                            bot.send_message(msg.chat.id, "Could not get preview :(")
-                                .send()
-                                .await?;
-
                             return Ok(());
                         }
                     }
@@ -183,14 +196,14 @@ pub async fn fetch_info(
                     Ok(())
                 }
                 None => {
-                    bot.delete_message(sending_message.chat.id, sending_message.id)
+                    bot.edit_message_text(
+                        sending_message.chat.id,
+                        sending_message.id,
+                        format!("Couldn't get preview from reddit :("),
+                    )
                         .send()
                         .await?;
-                    bot.send_message(msg.chat.id, "Could not get preview :(")
-                        .send()
-                        .await?;
-
-                    Ok(())
+                    return Ok(());
                 }
             };
         }
@@ -204,22 +217,22 @@ pub async fn fetch_info(
     };
 
     if let None = preview_url {
-        bot.send_message(msg.chat.id, "Could not get preview :(")
+        bot.edit_message_text(
+            sending_message.chat.id,
+            sending_message.id,
+            format!("Couldn't get preview from reddit :("),
+        )
             .send()
             .await?;
-
-        bot.delete_message(sending_message.chat.id, sending_message.id)
-            .send()
-            .await?;
-
         return Ok(());
     }
 
     let req = match reqwest::get(preview_url.unwrap()).await {
         Ok(resp) => resp,
         Err(e) => {
-            bot.send_message(
-                msg.chat.id,
+            bot.edit_message_text(
+                sending_message.chat.id,
+                sending_message.id,
                 format!("Couldn't get preview from reddit: {}", e.to_string()),
             )
             .send()
@@ -267,10 +280,13 @@ pub async fn fetch_info(
         let img = match image::guess_format(&bytes.to_vec()) {
             Ok(img) => img,
             Err(_) => {
-                bot.send_message(msg.chat.id, "Could not get preview :(")
+                bot.edit_message_text(
+                    sending_message.chat.id,
+                    sending_message.id,
+                    format!("Couldn't get preview from reddit :("),
+                )
                     .send()
                     .await?;
-
                 return Ok(());
             }
         };
@@ -301,9 +317,14 @@ pub async fn fetch_info(
                 .await?;
             }
             _ => {
-                bot.send_message(msg.chat.id, "Could not get preview :(")
+                bot.edit_message_text(
+                    sending_message.chat.id,
+                    sending_message.id,
+                    format!("Couldn't get preview from reddit :("),
+                )
                     .send()
                     .await?;
+                return Ok(());
             }
         }
     }

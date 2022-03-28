@@ -28,7 +28,6 @@ async fn action(
     if let Some(reply) = message.reply_to_message() {
         if let Some(url) = reply.text() {
             if let Ok(url) = validate_url(url) {
-                dbg!(&url);
                 fetch_info(bot, message, url.to_string()).await?;
                 return Ok(())
             }
