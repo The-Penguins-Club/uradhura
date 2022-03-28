@@ -1,11 +1,12 @@
 mod fetcher;
-mod validate_url;
+mod utils;
 
 use crate::fetcher::fetch_info;
 use std::error::Error;
 use teloxide::prelude2::*;
+use teloxide::types::ParseMode;
 use teloxide::utils::command::BotCommand;
-use crate::validate_url::validate_url;
+use crate::utils::{get_sender, validate_url};
 
 type Bot = AutoSend<teloxide::Bot>;
 
@@ -27,9 +28,18 @@ async fn action(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     if let Some(reply) = message.reply_to_message() {
         if let Some(url) = reply.text() {
-            if let Ok(url) = validate_url(url) {
+            if let Ok(url) = validate_url(url).await {
                 fetch_info(bot, message, url.to_string()).await?;
                 return Ok(())
+            } else {
+                let sender = get_sender(&message);
+                bot.send_message(
+                    message.chat.id,
+                    format!("Invalid url: `{url}`. Sent by: @{sender}"),
+                )
+                    .parse_mode(ParseMode::Markdown)
+                    .send()
+                    .await?;
             }
         }
     }

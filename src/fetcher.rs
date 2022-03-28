@@ -4,26 +4,8 @@ use std::env::temp_dir;
 use std::error::Error;
 use std::process::Command;
 use teloxide::prelude2::*;
-use teloxide::types::{InputFile, MessageCommon, MessageKind, ParseMode};
-use url::Url;
-use crate::validate_url;
-
-fn get_sender(message: &MessageCommon) -> String {
-    match &message.from {
-        None => "deleted_user".to_string(),
-        Some(u) => match &u.username {
-            Some(username) => username.to_string(),
-            None => {
-                u.first_name.clone()
-                    + &if let Some(last_name) = &u.last_name {
-                    " ".to_string() + last_name
-                } else {
-                    "".to_string()
-                }
-            }
-        },
-    }
-}
+use teloxide::types::{InputFile, MessageKind, ParseMode};
+use crate::{utils, validate_url};
 
 pub async fn fetch_info(
     bot: crate::Bot,
@@ -32,15 +14,11 @@ pub async fn fetch_info(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     bot.delete_message(msg.chat.id, msg.id).send().await?;
     let sender = match msg.kind {
-        MessageKind::Common(message) => {
-            if let Some(msg) = &message.reply_to_message {
-                if let MessageKind::Common(ref msg) = (&*msg).kind {
-                    get_sender(&msg)
-                } else {
-                    get_sender(&message)
-                }
+        MessageKind::Common(_) => {
+            if let Some(msg) = msg.reply_to_message() {
+                utils::get_sender(&*msg)
             } else {
-                get_sender(&message)
+                utils::get_sender(&msg)
             }
         },
         _ => {
@@ -51,7 +29,7 @@ pub async fn fetch_info(
             return Ok(());
         }
     };
-    let parsed_url = match validate_url(&url) {
+    let parsed_url = match validate_url(&url).await {
         Ok(u) => u,
         Err(_) => {
             bot.send_message(
