@@ -1,5 +1,6 @@
 use url::Url;
 use teloxide::prelude2::*;
+use teloxide::utils::markdown::escape;
 
 pub async fn validate_url(url: &str) -> Result<Url, ()> {
     let mut url = Url::parse(url).map_err(|_| ())?;
@@ -17,7 +18,6 @@ pub async fn validate_url(url: &str) -> Result<Url, ()> {
         }
 
         if !url.host().unwrap().to_string().contains("reddit.com") {
-            dbg!("Wtf!");
             return Err(())
         }
     }
@@ -26,7 +26,7 @@ pub async fn validate_url(url: &str) -> Result<Url, ()> {
 }
 
 pub fn get_sender(message: &Message) -> String {
-    match message.from() {
+    escape(&match message.from() {
         None => "deleted_user".to_string(),
         Some(u) => match &u.username {
             Some(username) => username.to_string(),
@@ -39,5 +39,5 @@ pub fn get_sender(message: &Message) -> String {
                 }
             }
         },
-    }
+    })
 }
