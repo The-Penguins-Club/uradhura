@@ -1,29 +1,37 @@
-# uradhura
+# উড়াধুরা (Uradhura)
 
-![language-rust](https://img.shields.io/badge/language-rust-orange)
-![language-rust](https://img.shields.io/badge/platform-telgram-blue)
+![language-rust](https://img.shields.io/badge/Language-Rust-orange)
+![language-rust](https://img.shields.io/badge/Platform-Telegram-blue)
 
-Telegram bot that fetches information from Reddit posts(with gif, image and video support) written in Rust. 
+Uradhura is a telegram bot which has only one purpose in it's life - fetch info from Reddit posts.
+
+## Features
+- Written in Rust. Why not?
+- Supports gif, image and even video
 
 ## Using Uradhura in Telegram
 
-Add [bot](https://t.me/uradhura_bot) to your group, or start a private chat. Use /rdl \<reddit link\> or send a link in the chat and reply with /rdl to fetch media. 
+To begin, add [uradhura_bot](https://t.me/uradhura_bot) to your group, or simply start a private chat with it. ~~It's always a good practice to start a conversation with random cat facts.~~ Use `/rdl <reddit_post_link>` or send a link of a reddit post in the chat and reply it with `/rdl` to fetch media attached to the post of the given link.
 
-### Permissions needed
+A cute demonstration:
 
-Give bot admin privillege with only "Delete Message" privillege.
+![](https://github.com/mehedirm6244/uradhura/blob/main/assets/uradhura_bot.gif)
+
+## Permissions
+
+Admin privillege with **only "Delete Message" privillege** is required for the bot to function properly.
 
 ![image](https://user-images.githubusercontent.com/63340482/160439196-f7aedae9-4b4d-4e59-9c94-e66e6eb986a4.png)
 
 
-## Build instruction
+# Build instruction
 
-**Dependencies**
-1. ffmpeg
-2. openssl
-3. rust(for compiling)
+### Dependencies
+- ffmpeg
+- openssl
+- rust (For compiling)
 
-**Start building**
+### Start building
 
 1. Install rustup
 2. Install stable toolchain of Rust
@@ -31,6 +39,6 @@ Give bot admin privillege with only "Delete Message" privillege.
 4. Add bot token to `TELOXIDE_TOKEN` environment variable
 4. Run the executable in `target/release/uradhura`
 
-## Author
+# Author
 
 MD Gaziur Rahman - [Telegram](https://t.me/mdgaziur001)
