@@ -1,9 +1,11 @@
 mod fetcher;
+mod validate_url;
 
 use crate::fetcher::fetch_info;
 use std::error::Error;
 use teloxide::prelude2::*;
 use teloxide::utils::command::BotCommand;
+use crate::validate_url::validate_url;
 
 type Bot = AutoSend<teloxide::Bot>;
 
@@ -23,6 +25,16 @@ async fn action(
     message: Message,
     command: Command,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if let Some(reply) = message.reply_to_message() {
+        if let Some(url) = reply.text() {
+            if let Ok(url) = validate_url(url) {
+                dbg!(&url);
+                fetch_info(bot, message, url.to_string()).await?;
+                return Ok(())
+            }
+        }
+    }
+
     match command {
         Command::Rdl { url } => fetch_info(bot, message, url).await?,
     }

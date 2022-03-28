@@ -6,6 +6,7 @@ use std::process::Command;
 use teloxide::prelude2::*;
 use teloxide::types::{InputFile, MessageKind, ParseMode};
 use url::Url;
+use crate::validate_url;
 
 pub async fn fetch_info(
     bot: crate::Bot,
@@ -36,27 +37,9 @@ pub async fn fetch_info(
             return Ok(());
         }
     };
-    let mut parsed_url = match Url::parse(&url) {
+    let mut parsed_url = match validate_url(&url) {
         Ok(u) => u,
-        Err(e) => {
-            bot.send_message(
-                msg.chat.id,
-                format!(
-                    "Invalid url: `{url}`. Sent by: @{sender}\nError message: {}",
-                    e.to_string()
-                ),
-            )
-            .parse_mode(ParseMode::Markdown)
-            .send()
-            .await?;
-            return Ok(());
-        }
-    };
-    parsed_url.set_query(None);
-    url = parsed_url.to_string();
-
-    if let Some(host) = parsed_url.host() {
-        if !host.to_string().contains("reddit.com") {
+        Err(_) => {
             bot.send_message(
                 msg.chat.id,
                 format!("Invalid url: `{url}`. Sent by: @{sender}"),
@@ -66,7 +49,8 @@ pub async fn fetch_info(
             .await?;
             return Ok(());
         }
-    }
+    };
+    url = parsed_url.to_string();
 
     let query_url = url.clone() + ".json";
     let resp = match reqwest::get(&query_url).await {
