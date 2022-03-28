@@ -13,6 +13,10 @@ Uradhura is a telegram bot which has only one purpose in it's life - fetch info 
 
 To begin, add [uradhura_bot](https://t.me/uradhura_bot) to your group, or simply start a private chat with it. ~~It's always a good practice to start a conversation with random cat facts.~~ Use `/rdl <reddit_post_link>` or send a link of a reddit post in the chat and reply it with `/rdl` to fetch media attached to the post of the given link.
 
+A cute demonstration:
+
+![](https://github.com/mehedirm6244/uradhura/blob/main/assets/uradhura_bot.gif)
+
 ## Permissions
 
 Admin privillege with **only "Delete Message" privillege** is required for the bot to function properly.
