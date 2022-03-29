@@ -17,7 +17,7 @@ Use `/rdl <reddit_post_link>` or send a link of a reddit post in the chat and re
 
 A demonstration:
 
-![](https://github.com/mehedirm6244/uradhura/blob/main/assets/uradhura_bot.gif)
+![](https://github.com/The-Penguins-Club/uradhura/blob/main/assets/uradhura_bot.gif)
 
 ## Permissions
 
