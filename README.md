@@ -3,17 +3,19 @@
 ![language-rust](https://img.shields.io/badge/Language-Rust-orange)
 ![language-rust](https://img.shields.io/badge/Platform-Telegram-blue)
 
-Uradhura is a telegram bot which has only one purpose in it's life - fetch info from Reddit posts.
+Uradhura is a telegram bot that fetches information and media from reddit.
 
 ## Features
-- Written in Rust. Why not?
-- Supports gif, image and even video
+- Written in Rust.
+- Supports gif, image and even videos.
 
 ## Using Uradhura in Telegram
 
-To begin, add [uradhura_bot](https://t.me/uradhura_bot) to your group, or simply start a private chat with it. ~~It's always a good practice to start a conversation with random cat facts.~~ Use `/rdl <reddit_post_link>` or send a link of a reddit post in the chat and reply it with `/rdl` to fetch media attached to the post of the given link.
+To begin, add [uradhura_bot](https://t.me/uradhura_bot) to your group, or simply start a private chat with it.
 
-A cute demonstration:
+Use `/rdl <reddit_post_link>` or send a link of a reddit post in the chat and reply with `/rdl` to fetch media attached to the link. 
+
+A demonstration:
 
 ![](https://github.com/mehedirm6244/uradhura/blob/main/assets/uradhura_bot.gif)
 
@@ -42,3 +44,7 @@ Admin privillege with **only "Delete Message" privillege** is required for the b
 # Author
 
 MD Gaziur Rahman - [Telegram](https://t.me/mdgaziur001)
+
+# Contributors
+
+Mehedi Rahman Mahi - [Telegram](https://t.me/mehedirm)
