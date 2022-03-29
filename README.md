@@ -15,7 +15,7 @@ To begin, add [uradhura_bot](https://t.me/uradhura_bot) to your group, or simply
 
 A cute demonstration:
 
-![](https://github.com/mehedirm6244/uradhura/blob/main/assets/uradhura_bot.gif)
+https://github.com/The-Penguins-Club/uradhura/blob/main/assets/uradhura_bot.gif
 
 ## Permissions
 
