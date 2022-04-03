@@ -87,13 +87,13 @@ pub async fn fetch_info(
     let votes = post.get("score").unwrap().as_i64().unwrap();
 
     bot.send_message(msg.chat.id, format!("\
-    *{title}*\n\
-    By [u/{author}](https://reddit.com/u/{author}) in [r/{subreddit}](https://reddit.com/r/{subreddit})\n\
+    <b>{title}</b>\n\
+    By <a href=\"https://reddit.com/u/{author}\">u/{author}</a> in <a href=\"https://reddit.com/r/{subreddit}\">r/{subreddit}</a>\n\
     Sent by: @{sender}\n\
     Votes: {votes}\n\
-    [Post Link]({url})\
+    <a href=\"{url}\">Post link</a>\
     "))
-        .parse_mode(ParseMode::Markdown)
+        .parse_mode(ParseMode::Html)
         .disable_web_page_preview(true)
         .send()
         .await?;
