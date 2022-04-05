@@ -1,6 +1,6 @@
 use url::Url;
 use teloxide::prelude2::*;
-use teloxide::utils::markdown::escape;
+use teloxide::utils::html::escape;
 
 pub async fn validate_url(url: &str) -> Result<Url, ()> {
     let mut url = Url::parse(url).map_err(|_| ())?;
