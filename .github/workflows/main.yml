@@ -43,6 +43,9 @@ jobs:
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+on:
+  workflow_dispatch:
+  
   deploy:
     runs-on: ubuntu-latest
 
