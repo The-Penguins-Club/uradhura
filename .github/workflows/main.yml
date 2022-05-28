@@ -27,16 +27,17 @@ jobs:
 
       - name: Build
         run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/PROJECT_NAME_amd64
+        run: echo HI
 
-  release:    
-    runs-on: ubuntu-latest
+  # release:    
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        # if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            target/release/$PROJECT_NAME_amd64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   steps:
+  #     - name: Release
+  #       uses: softprops/action-gh-release@v1
+  #       # if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         files: |
+  #           target/release/$PROJECT_NAME_amd64
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
