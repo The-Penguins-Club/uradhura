@@ -10,6 +10,7 @@ env:
   CARGO_TERM_COLOR: always
   PROJECT_NAME: ${{ github.event.repository.name }}
   SSH_USER: ${{ secrets.SSH_USER }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   DEPLOYMENT_HOST: ${{ secrets.DEPLOYMENT_HOST }}
 
 jobs:
@@ -50,5 +51,11 @@ on:
     runs-on: ubuntu-latest
 
     steps:
+      - name: add host key verification
+        run: |
+          eval $(ssh-agent -s)
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+          chmod 700 ~/.ssh
+          ssh-keyscan $DEPLOYMENT_HOST > ~/.ssh/known_hosts
       - name: rsync binary
         run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
