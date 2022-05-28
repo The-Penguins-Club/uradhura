@@ -25,12 +25,13 @@ jobs:
           default: true
           override: true
 
+      - name:
+        run: echo $PROJECT_NAME is ${{ github.event.repository.name }}
       - name: Build
-        run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/$PROJECT_NAME_amd64
+        run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/${PROJECT_NAME}_amd64
       - name: list files
         run: ls -la target/release/
-      - name:
-        run: echo ${{ github.event.repository.name }}
+
 
   # release:    
   #   runs-on: ubuntu-latest
