@@ -62,7 +62,9 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan $DEPLOYMENT_HOST > ~/.ssh/known_hosts
       - name: create fake file
-        run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME
+        run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME && ls -la target/release/
+      - name: print var
+        run: $PROJECT_NAME $SSH_USER $DEPLOYMENT_HOST
       - name: rsync binary
         run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
       - name: check if file exist
