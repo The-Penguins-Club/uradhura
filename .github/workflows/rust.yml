@@ -28,6 +28,10 @@ jobs:
       - name: Build
         run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/PROJECT_NAME_amd64
 
+  release:    
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
