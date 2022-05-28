@@ -63,11 +63,11 @@ jobs:
           ssh-keyscan $DEPLOYMENT_HOST > ~/.ssh/known_hosts
       - name: create fake file
         run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME && ls -la target/release/
-      - name: print var
-        run: echo "$PROJECT_NAME $SSH_USER $DEPLOYMENT_HOST"
-      - name: rsync binary
-        run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
-      - name: check if file exist
-        run: ssh $SSH_USER@$DEPLOYMENT_HOST "ls /home/$SSH_USER/uradhura/"
-      - name : restert uradhura.service
-        run: ssh $SSH_USER@$DEPLOYMENT_HOST "systemctl --user restart uradhura.service"
+      - name: test ssh
+        run: ssh -t $SSH_USER@$DEPLOYMENT_HOST "uptime"
+      # - name: rsync binary
+      #   run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
+      # - name: check if file exist
+      #   run: ssh $SSH_USER@$DEPLOYMENT_HOST "ls /home/$SSH_USER/uradhura/"
+      # - name : restert uradhura.service
+      #   run: ssh $SSH_USER@$DEPLOYMENT_HOST "systemctl --user restart uradhura.service"
