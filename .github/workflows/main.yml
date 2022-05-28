@@ -30,6 +30,7 @@ jobs:
       - name: list files
         run: |
           ls -la target/release/
+          echo ${{ github.event.repository.name }}
 
   # release:    
   #   runs-on: ubuntu-latest
@@ -43,3 +44,9 @@ jobs:
   #           target/release/$PROJECT_NAME_amd64
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: rsync binary
