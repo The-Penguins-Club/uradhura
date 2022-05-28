@@ -51,3 +51,4 @@ jobs:
 
     steps:
       - name: rsync binary
+        run: echo "rsync"
