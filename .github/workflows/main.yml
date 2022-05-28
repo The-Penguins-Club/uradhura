@@ -26,7 +26,7 @@ jobs:
           override: true
 
       - name: Build
-        run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/PROJECT_NAME_amd64
+        run: cargo build --all --release && strip target/release/$PROJECT_NAME && mv target/release/$PROJECT_NAME target/release/$PROJECT_NAME_amd64
       - name: list files
         run: |
           ls -la target/release/
