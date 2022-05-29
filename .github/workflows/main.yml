@@ -60,15 +60,11 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan $DEPLOYMENT_HOST > ~/.ssh/known_hosts
+          ssh-keyscan "$DEPLOYMENT_HOST" > ~/.ssh/known_hosts
       - name: create fake file
         run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME && ls -la target/release/
       - name: test ssh
-        run: |
-          ssh -V
-          ls -la ~/.ssh/known_hosts
-          cat ~/.ssh/known_hosts
-          ssh $SSH_USER@$DEPLOYMENT_HOST "uptime"
+        run: ssh "$SSH_USER"@"$DEPLOYMENT_HOST" "uptime"
       # - name: rsync binary
       #   run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
       # - name: check if file exist
