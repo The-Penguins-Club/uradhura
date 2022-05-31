@@ -48,6 +48,7 @@ jobs:
       - name: Build
         run: cargo build --all --release && strip target/release/$PROJECT_NAME
 
+name: Deploy Uradhura
   deploy:
     runs-on: ubuntu-latest
 
