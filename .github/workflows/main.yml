@@ -56,8 +56,6 @@ jobs:
     steps:
       - name: add host key verification
         run: |
-          id
-          
           mkdir -p ~/.ssh
           chmod -R 700 ~/.ssh
           cd ~/.ssh
@@ -66,15 +64,8 @@ jobs:
           chmod 400 id_rsa
 
           ssh-keyscan $DEPLOYMENT_HOST > known_hosts
-          chmod 644 known_hosts
-      
-      - name: create fake file
-        run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME && ls -la target/release/
-      # - name: test ssh
-      #   run: ssh "$SSH_USER"@"$DEPLOYMENT_HOST" "uptime"
+          chmod 644 known_hosts      
       - name: rsync binary
         run: rsync -a target/release/$PROJECT_NAME $SSH_USER@$DEPLOYMENT_HOST:/home/$SSH_USER/uradhura/
-      - name: check if file exist
-        run: ssh $SSH_USER@$DEPLOYMENT_HOST "ls /home/$SSH_USER/uradhura/"
       - name : restert uradhura.service
         run: ssh $SSH_USER@$DEPLOYMENT_HOST "systemctl --user restart uradhura.service"
