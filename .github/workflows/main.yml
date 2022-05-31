@@ -56,11 +56,16 @@ jobs:
     steps:
       - name: add host key verification
         run: |
-          eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan "$DEPLOYMENT_HOST" > ~/.ssh/known_hosts
+          mkdir -p /root/.ssh
+          chmod -R 700 /root/.ssh
+          cd /root/.ssh
+
+          printf "$SSH_PRIVATE_KEY\n" > id_rsa
+          chmod 400 id_rsa
+
+          ssh-keyscan $DEPLOYMENT_HOST > known_hosts
+          chmod 644 known_hosts
+      
       - name: create fake file
         run: mkdir -p target/release/ && touch target/release/$PROJECT_NAME && ls -la target/release/
       - name: test ssh
