@@ -56,9 +56,11 @@ jobs:
     steps:
       - name: add host key verification
         run: |
-          mkdir -p /root/.ssh
-          chmod -R 700 /root/.ssh
-          cd /root/.ssh
+          id
+          
+          mkdir -p ~/.ssh
+          chmod -R 700 ~/.ssh
+          cd ~/.ssh
 
           printf "$SSH_PRIVATE_KEY\n" > id_rsa
           chmod 400 id_rsa
